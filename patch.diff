@@ -1,0 +1,105 @@
+commit 14b5c1b55c50f32ace7480e4df3d0928524a62fd
+Author: Santeri Hurnanen <santeri@oikeuttaelaimille.fi>
+Date:   Fri Nov 1 17:45:23 2019 +0200
+
+    Modify webform jsonapi output
+
+diff --git a/drupal-module/gatsby_webform/src/Plugin/jsonapi/FieldEnhancer/WebformElementsEnhancer.php b/drupal-moduleb/gatsby_webform/src/Plugin/jsonapi/FieldEnhancer/WebformElementsEnhancer.php
+index ea30daf..6ab3181 100644
+--- a/drupal-module/gatsby_webform/src/Plugin/jsonapi/FieldEnhancer/WebformElementsEnhancer.php
++++ b/drupal-module/gatsby_webform/src/Plugin/jsonapi/FieldEnhancer/WebformElementsEnhancer.php
+@@ -98,18 +98,9 @@ public function doUndoTransform($data, Context $context) {
+     //
+     // This loop does the beforementioned transformation:
+     foreach ($elements as $name => $attributes) {
+-      $element = [
+-        'name' => $name,
+-        // Type should be present in every element.
+-        'type' => $attributes['#type'] ?? NULL,
+-        'attributes' => []
+-      ];
+-
+-      unset($attributes['#type']);
+-
+-      $element['attributes'] = self::normalizeAttributes($attributes);
+-
+-      $data[] = $element;
++      $data[] = [
++        'name' => $name
++      ] + self::normalizeAttributes($attributes);
+     }
+ 
+     return $data;
+@@ -145,28 +136,39 @@ public function getSettingsForm(array $resource_field_info) {
+    * @return void
+    */
+   private static function normalizeAttributes(array $attributes) {
+-    $normalizedAttributes = [];
++    // Default values to make it easier for GraphQL to infer types if some keys are missing.
++    $normalizedAttributes = [
++      'type' => null,
++      'states' => null,
++      'options' => null,
++      'attributes' => []
++    ];
+ 
+     foreach ($attributes as $name => $content) {
+       switch ($name) {
++        // Form element type (e.g. textfield or email). Should be present on every element.
++        case '#type':
++
++          $normalizedAttributes['type'] = $content;
++          break;
++
++        // Drupal form api states.
+         case '#states':
+-          $states = [
+-            'name' => $name,
+-            'states' => [],
+-          ];
++          $states = [];
+ 
+           foreach ($content as $key => $value) {
+             $selector = array_keys($value)[0];
+-            $states['states'][] = [
+-              $key => [
+-                'selector' => $selector,
+-              ] + $value[$selector]
++            $states[] = [
++              'state' => $key,
++              'selector' => $selector,
++              'condition' => $value[$selector]
+             ];
+           }
+ 
+-          $normalizedAttributes[] = $states;
++          $normalizedAttributes['states'] = $states;
+           break;
+ 
++        // Checkbox or select element options.
+         case '#options':
+           $options = [];
+ 
+@@ -177,19 +179,15 @@ private static function normalizeAttributes(array $attributes) {
+             ];
+           }
+ 
+-          $normalizedAttributes[] = [
+-            'name' => $name,
+-            'options' => $options
+-          ];
+-
++          $normalizedAttributes['options'] = $options;
+           break;
+ 
++        // Other attributes that can be represented as key => string.
+         default:
+-          $normalizedAttributes[] = [
++          $normalizedAttributes['attributes'][] = [
+             'name' => $name,
+             'value' => strval($content)
+           ];
+-
+           break;
+       }
+     }

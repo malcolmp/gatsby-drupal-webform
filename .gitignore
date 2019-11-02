@@ -65,3 +65,10 @@ dist
 
 # VScode settings
 .vscode
+
+vendor
+drupal/modules/contrib
+drupal/core
+drupal/profiles
+drupal/sites
+drupal/themes
