@@ -214,7 +214,7 @@ export function useWebformStates(webformStates: WebformState[]) {
 				element.removeEventListener('change', callback)
 			}
 		}
-	}, webformStates)
+	}, [...webformStates])
 
 	return states
 }
@@ -251,6 +251,35 @@ export const WebformInputElement: React.FC<WebformComponentProps> = ({ typeOverr
 			</WebformLabel>
 
 			<input id={id} className="form-control" {...props} />
+
+			{/** Render error message if present. */}
+			{error && <WebformError error={error} />}
+
+			{/** Render description if present. */}
+			{other['#description'] && <WebformDescription description={other['#description']} />}
+		</div>
+	)
+}
+
+/**
+ * Render as webform textarea element.
+ */
+export const WebformTextareaElement: React.FC<WebformComponentProps> = ({ element, error }) => {
+	const [props, other] = parseWebformAttributes<HTMLTextAreaElement>(element.attributes, element.name)
+	const id = getElementId(element.name)
+	const states = useWebformStates(element.states || [])
+
+	if (isElementHidden(states)) {
+		return <></>
+	}
+
+	return (
+		<div className="form-group">
+			<WebformLabel htmlFor={id} visuallyHidden={isTitleHidden(element.type, other)}>
+				{other['#title']}
+			</WebformLabel>
+
+			<textarea id={id} className="form-control" {...props} />
 
 			{/** Render error message if present. */}
 			{error && <WebformError error={error} />}
@@ -382,6 +411,8 @@ export function renderWebformElement(element: WebformElement, error?: string, Cu
 	switch (element.type) {
 		case 'textfield':
 			return <WebformInputElement typeOverride="text" element={element} error={error} />
+		case 'textarea':
+			return <WebformTextareaElement element={element} error={error} />
 		case 'tel':
 		case 'number':
 		case 'email':

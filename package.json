@@ -75,8 +75,8 @@
     ]
   },
   "lint-staged": {
-    "{src,test}/**/*.ts{x,}": [
-      "eslint . --fix",
+    "src/**/*.ts{x,}": [
+      "eslint ./src --fix",
       "git add"
     ]
   },

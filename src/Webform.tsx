@@ -71,6 +71,16 @@ export type WebformSubmitHandler = (
 export type WebformSuccessHandler = (response: any, event: FormEvent<HTMLFormElement>) => void
 export type WebformErrorHandler = (err: any, event: FormEvent<HTMLFormElement>) => void
 
+export class WebformError extends Error {
+	response: any
+
+	constructor(response: any) {
+		super()
+
+		this.response = response
+	}
+}
+
 /**
  * Element errors returned by Drupal.
  */
@@ -79,6 +89,7 @@ type WebformErrors = {
 }
 
 interface Props {
+	id?: string
 	className?: string
 	style?: React.CSSProperties
 
@@ -140,7 +151,7 @@ const Webform = ({ webform, customComponents, ...props }: Props) => {
 				})
 
 				if (response.data.error) {
-					throw { response }
+					throw new WebformError(response)
 				}
 
 				// Convey current form state.
@@ -164,7 +175,13 @@ const Webform = ({ webform, customComponents, ...props }: Props) => {
 	}
 
 	return (
-		<form onSubmit={submitHandler} className={props.className} style={props.style} data-webform-id={webform.drupal_internal__id}>
+		<form
+			onSubmit={submitHandler}
+			id={props.id}
+			className={props.className}
+			style={props.style}
+			data-webform-id={webform.drupal_internal__id}
+		>
 			{/* Render webform elements */}
 			{webform.elements.map(element => (
 				<React.Fragment key={element.name}>
@@ -187,15 +204,11 @@ Webform.defaultProps = {
 export default Webform
 
 export const query = graphql`
-	fragment Webform on webform__webform {
+	fragment SimpleWebform on webform__webform {
 		drupal_internal__id
 		elements {
 			name
 			type
-			options {
-				label
-				value
-			}
 			attributes {
 				name
 				value
