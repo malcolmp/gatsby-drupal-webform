@@ -1,0 +1,10 @@
+{
+	"name": "drupal/gatsby_webform",
+	"type": "drupal-module",
+	"license": "MIT",
+	"require" : {
+	  "drupal/core": "~8.0",
+	  "drupal/webform": "^5.5",
+	  "drupal/jsonapi_extras": "^3.12"
+	}
+  }
