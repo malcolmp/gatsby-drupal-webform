@@ -1,16 +1,15 @@
 import React from 'react'
 
-import { WebformCustomComponent } from '..'
-import { useWebformElement } from '../utils'
+import { WebformComponent } from '..'
 
 import WebformElementWrapper from './WebformElementWrapper'
+import { deNormalizeElement } from '../utils'
 
-export const WebformText: WebformCustomComponent = ({ element, error }) => {
-	const [, settings] = useWebformElement(element, {})
-
+export const WebformText: WebformComponent = ({ element, error }) => {
+	const el = deNormalizeElement(element, {})
 	return (
-		<WebformElementWrapper settings={settings} error={error}>
-			<div dangerouslySetInnerHTML={{ __html: settings.attributes.text || '' }} />
+		<WebformElementWrapper element={el} error={error}>
+			<div dangerouslySetInnerHTML={{ __html: el.additional_properties.markup || '' }} />
 		</WebformElementWrapper>
 	)
 }

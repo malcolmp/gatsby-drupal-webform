@@ -1,6 +1,6 @@
-import Webform, { WebformObject, WebformCustomComponent } from './Webform'
-import { useWebformElement, formToJSON } from './utils'
+import Webform, { WebformObject, WebformComponent } from './Webform'
+import { deNormalizeElement, formToJSON, getOptionId, getElementId } from './utils'
 import { WebformElementWrapper } from './components'
 
-export { WebformObject, WebformCustomComponent, formToJSON, useWebformElement, WebformElementWrapper }
+export { WebformObject, WebformComponent, formToJSON, deNormalizeElement, WebformElementWrapper, getOptionId, getElementId }
 export default Webform

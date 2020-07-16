@@ -8,78 +8,67 @@ const webform = {
 	elements: [
 		{
 			name: 'name',
+			title: 'Your Name',
 			type: 'textfield',
 			attributes: [
 				{
-					name: '#title',
-					value: 'Your Name'
-				},
-				{
-					name: '#required',
+					name: 'required',
 					value: 'true'
 				},
 				{
-					name: '#default_value',
+					name: 'defaultValue',
 					value: 'John'
 				}
 			]
 		},
 		{
 			name: 'email',
+			title: 'Your Email',
 			type: 'email',
 			attributes: [
 				{
-					name: '#title',
-					value: 'Your Email'
-				},
-				{
-					name: '#required',
+					name: 'required',
 					value: 'true'
 				},
 				{
-					name: '#default_value',
+					name: 'defaultValue',
 					value: 'john@example.com'
+				},
+				{
+					name: 'autocomplete',
+					value: 'email'
 				}
 			]
 		},
 		{
 			name: 'subject',
+			title: 'Subject',
 			type: 'email',
 			attributes: [
 				{
-					name: '#title',
-					value: 'Subject'
-				},
-				{
-					name: '#required',
+					name: 'required',
 					value: 'true'
 				}
 			]
 		},
 		{
 			name: 'message',
+			title: 'Subject',
 			type: 'textarea',
 			attributes: [
 				{
-					name: '#title',
-					value: 'Subject'
-				},
-				{
-					name: '#required',
+					name: 'required',
 					value: 'true'
 				}
 			]
 		},
 		{
 			name: 'actions',
+			title: 'Submit button(s)',
 			type: 'webform_actions',
-			attributes: [
+			additional_properties: [
 				{
-					name: '#title',
-					value: 'Submit button(s)'
-				},
-				{
-					name: '#submit__label',
+					name: 'submit__label',
 					value: 'Send message'
 				}
 			]
@@ -100,14 +89,11 @@ describe('Webform', () => {
 			elements: [
 				{
 					name: 'name',
+					title: 'Your Name',
 					type: 'textfield',
-					attributes: [
+					additional_properties: [
 						{
-							name: '#title',
-							value: 'Your Name'
-						},
-						{
-							name: '#title_display',
+							name: 'title_display',
 							value: 'invisible'
 						}
 					]
@@ -126,13 +112,8 @@ describe('Webform', () => {
 			elements: [
 				{
 					name: 'name',
+					title: 'Your Name',
 					type: 'hidden',
-					attributes: [
-						{
-							name: '#title',
-							value: 'Your Name'
-						}
-					]
 				}
 			]
 		}
@@ -147,16 +128,12 @@ describe('Webform', () => {
 			elements: [
 				{
 					name: 'tos',
+					title: 'Agree terms of service',
 					type: 'checkbox',
-					attributes: [
-						{
-							name: '#title',
-							value: 'Agree terms of service'
-						}
-					]
 				},
 				{
 					name: 'favourite_color',
+					title: 'Select your favourite color',
 					type: 'radios',
 					options: [
 						{
@@ -170,12 +147,6 @@ describe('Webform', () => {
 						{
 							label: 'Cornflower blue',
 							value: '#6495ed'
-						}
-					],
-					attributes: [
-						{
-							name: '#title',
-							value: 'Select your favourite color'
 						}
 					]
 				}

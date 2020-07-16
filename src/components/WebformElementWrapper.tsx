@@ -1,9 +1,8 @@
 import React from 'react'
-
-import { WebformSettings } from '../Webform'
+import { DeNormalizedWebformElement } from '../Webform'
 
 interface Props extends React.HTMLProps<HTMLDivElement> {
-	settings: WebformSettings
+	element: DeNormalizedWebformElement
 	labelFor?: string
 	labelClassName?: string
 	error?: string
@@ -12,12 +11,12 @@ interface Props extends React.HTMLProps<HTMLDivElement> {
 /**
  * Return true if element title should be visually hidden.
  */
-export function isTitleHidden(webformAttributes: WebformSettings['attributes']) {
-	return webformAttributes.title_display === 'invisible'
+export function isTitleHidden(elementProperties: DeNormalizedWebformElement['additional_properties']) {
+	return elementProperties ? elementProperties.title_display === 'invisible' : false
 }
 
-export function getTileStyle(webformAttributes: WebformSettings['attributes']): React.CSSProperties | undefined {
-	if (isTitleHidden(webformAttributes)) {
+export function getTileStyle(elementProperties: DeNormalizedWebformElement['additional_properties']): React.CSSProperties | undefined {
+	if (isTitleHidden(elementProperties)) {
 		return {
 			position: 'absolute',
 			overflow: 'hidden',
@@ -31,44 +30,52 @@ export function getTileStyle(webformAttributes: WebformSettings['attributes']): 
 	return undefined
 }
 
-export function getTitleDisplay(webformAttributes: WebformSettings['attributes']): 'before' | 'after' {
-	return webformAttributes.title_display === 'after' ? 'after' : 'before'
+export function getTitleDisplay(elementProperties: DeNormalizedWebformElement['additional_properties']): 'before' | 'after' {
+	return elementProperties ? (elementProperties.title_display === 'after' ? 'after' : 'before') : 'before'
 }
 
-export function isElementHidden(states: WebformSettings['states']): boolean {
-	return states.invisible === true || states.visible === false
+export function isElementHidden(states: DeNormalizedWebformElement['states']): boolean {
+	return states ? states.invisible === true || states.visible === false : false
 }
 
-function classNames(list: Array<undefined | false | string>) {
+function classNames(list: Array<undefined | boolean | string>) {
 	const className = list.filter(item => typeof item === 'string').join(' ')
 
 	return className.length > 0 ? className : undefined
 }
 
-const ElementWrapper: React.FC<Props> = ({ children, settings, error, labelFor, labelClassName, ...props }) => {
-	const { states, attributes } = settings
+const ElementWrapper: React.FC<Props> = ({ children, element, error, labelFor, labelClassName, ...props }) => {
+	const states = element.states
+	const attributes = element.attributes || {}
+	const elementProperties = element.additional_properties || {}
+	const wrapperAttributes = element.wrapper_attributes || {}
+	// Pass required prop here and add css class 'required' etc. to label.
+	const wrapperClassList = ['form-group', error != null && 'is-invalid', props.className, wrapperAttributes.className]
+	if (attributes.required) {
+		wrapperClassList.push('required')
+	}
+	const wrapperClassNames = classNames(wrapperClassList)
 
-	const wrapperClassNames = classNames(['form-group', error != null && 'is-invalid', props.className, attributes.wrapper_class])
-	// todo: pass required prop here and add css class 'required' etc. to label.
-	const labelClassNames = classNames([labelClassName, attributes.label_class])
+	const labelAttributes = element.label_attributes || {}
+	const labelClassNames = classNames([labelClassName, labelAttributes.className])
 
 	if (states && isElementHidden(states)) {
 		return <></>
 	}
 
 	const label = (
-		<label style={getTileStyle(attributes)} className={labelClassNames} htmlFor={labelFor}>
-			{attributes.title}
+		<label style={getTileStyle(elementProperties)} className={labelClassNames} htmlFor={labelFor}>
+			{element.title}
 		</label>
 	)
 
 	return (
 		<div {...props} className={wrapperClassNames}>
-			{getTitleDisplay(attributes) === 'before' && label}
+			{getTitleDisplay(elementProperties) === 'before' && label}
 
 			{children}
 
-			{getTitleDisplay(attributes) === 'after' && label}
+			{getTitleDisplay(elementProperties) === 'after' && label}
 
 			{error && (
 				<div className="form-text invalid-feedback" {...props}>

@@ -1,21 +1,19 @@
 import React from 'react'
-
-import { WebformCustomComponent } from '..'
-import { getElementId, useWebformElement } from '../utils'
-
+import { WebformComponent } from '..'
+import { getElementId, deNormalizeElement } from '../utils'
 import WebformElementWrapper from './WebformElementWrapper'
 
-export const WebformTextarea: WebformCustomComponent = ({ element, error }) => {
+export const WebformTextarea: WebformComponent = ({ element, error }) => {
 	const id = getElementId(element.name)
-	const [inputProps, settings] = useWebformElement(element, {
+	const el = deNormalizeElement(element, {
 		className: 'form-control',
 		name: element.name,
 		id
 	})
 
 	return (
-		<WebformElementWrapper settings={settings} error={error} labelFor={id}>
-			<textarea {...inputProps} />
+		<WebformElementWrapper element={el} error={error} labelFor={id}>
+			<textarea {...el.attributes} />
 		</WebformElementWrapper>
 	)
 }

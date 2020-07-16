@@ -2,33 +2,29 @@ import React from 'react'
 
 import { render } from '@testing-library/react'
 
-import { WebformElementWrapper, useWebformElement } from '..'
+import {WebformElementWrapper, useWebformElement, deNormalizeElement} from '..'
 
 describe('Element wrapper', () => {
 	it('element wrapper renders correctly', () => {
 		const element = {
 			name: 'name',
+			title: 'Your Name',
 			type: 'textfield',
 			attributes: [
 				{
-					name: '#title',
-					value: 'Your Name'
-				},
-				{
-					name: '#required',
+					name: 'required',
 					value: 'true'
 				},
 				{
-					name: '#default_value',
+					name: 'defaultValue',
 					value: 'John'
 				}
 			]
 		}
 
 		const TestComponent = () => {
-			const [, settings] = useWebformElement(element, {})
-
-			return <WebformElementWrapper settings={settings} error={undefined} />
+			const denormalized = deNormalizeElement(element);
+			return <WebformElementWrapper element={denormalized} error={undefined} />
 		}
 
 		const { container, queryByText } = render(<TestComponent />)
@@ -43,18 +39,15 @@ describe('Element wrapper', () => {
 	it('error messages render correctly', () => {
 		const element = {
 			name: 'name',
+			title: 'Your Name',
 			type: 'textfield',
 			attributes: [
 				{
-					name: '#title',
-					value: 'Your Name'
-				},
-				{
-					name: '#required',
+					name: 'required',
 					value: 'true'
 				},
 				{
-					name: '#default_value',
+					name: 'defaultValue',
 					value: 'John'
 				}
 			]
@@ -62,9 +55,8 @@ describe('Element wrapper', () => {
 
 		const testError = 'This field is required'
 		const TestComponent = () => {
-			const [, settings] = useWebformElement(element, {})
-
-			return <WebformElementWrapper settings={settings} error={testError} />
+			const denormalized = deNormalizeElement(element);
+			return <WebformElementWrapper element={denormalized} error={testError} />
 		}
 
 		const { container, queryByText } = render(<TestComponent />)
@@ -79,35 +71,35 @@ describe('Element wrapper', () => {
 	it('element wrapper class attributes render correctly', () => {
 		const element = {
 			type: 'number',
+			title: 'Test number',
 			name: 'amount',
 			attributes: [
 				{
-					name: '#title',
-					value: 'Test number'
-				},
-				{
-					name: '#class',
+					name: 'class',
 					value: 'my-element-class'
 				},
 				{
-					name: '#placeholder',
+					name: 'placeholder',
 					value: 'Your favourite number'
-				},
+				}
+			],
+			label_attributes: [
 				{
-					name: '#label_class',
+					name: 'class',
 					value: 'my-label-class'
-				},
+				}
+			],
+			wrapper_attributes: [
 				{
-					name: '#wrapper_class',
+					name: 'class',
 					value: 'my-wrapper-class'
 				}
 			]
 		}
 
 		const TestComponent = () => {
-			const [, settings] = useWebformElement(element, {})
-
-			return <WebformElementWrapper settings={settings} error={undefined} className="custom-class" />
+			const denormalized = deNormalizeElement(element);
+			return <WebformElementWrapper element={denormalized} error={undefined} className="custom-class" />
 		}
 
 		const { container, queryByText } = render(<TestComponent />)

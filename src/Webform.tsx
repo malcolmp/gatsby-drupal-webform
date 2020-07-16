@@ -1,17 +1,9 @@
 import React, { useState, FormEvent } from 'react'
 import axios from 'axios'
-import { graphql } from 'gatsby'
+import './fragments'
 
-import { getAttributeValue, formToJSON } from './utils'
-import {
-	WebformDebug,
-	WebformInput,
-	WebformSelect,
-	WebformTextarea,
-	WebformCheckbox,
-	WebformCheckboxGroup,
-	WebformText
-} from './components'
+import { deNormalizeElement, formToJSON } from './utils'
+import { WebformInput, WebformSelect, WebformTextarea, WebformCheckbox, WebformCheckboxGroup, WebformText } from './components'
 
 export const DEFAULT_SUBMIT_LABEL = 'Submit'
 
@@ -25,21 +17,16 @@ export interface WebformObject {
 	elements: WebformElement[]
 }
 
-export type WebformSettings = {
-	attributes: { [key: string]: string }
-	states: { [key: string]: boolean }
-}
-
 /**
- * Webform element (e.g. text field input or submit button).
+ * Webform element (e.g. text field input or submit button) as returned by GraphQL.
  */
 export type WebformElement = {
 	name: string
+	title: string
 	type: string
-	attributes: Array<{
-		name: string
-		value: string
-	}>
+	attributes?: WebformElementAttribute[]
+	label_attributes?: WebformElementAttribute[]
+	wrapper_attributes?: WebformElementAttribute[]
 	options?: Array<{
 		label: string
 		value: string
@@ -51,9 +38,46 @@ export type WebformElement = {
 			[key: string]: boolean | string | null
 		}
 	}>
+	additional_properties?: WebformElementAttribute[]
 }
 
-export type WebformCustomComponentProps = {
+/**
+ * A name value mapping of element attributes.
+ */
+export type WebformElementAttribute = {
+	name: string
+	value: string
+}
+
+/**
+ * A de-normalized webform element.
+ */
+export type DeNormalizedWebformElement = {
+	name: string
+	title: string
+	type: string
+	attributes: {
+		[key: string]: any
+	}
+	label_attributes: {
+		[key: string]: any
+	}
+	wrapper_attributes: {
+		[key: string]: any
+	}
+	options?: Array<{
+		label: string
+		value: string
+	}>
+	states?: {
+		[key: string]: boolean
+	}
+	additional_properties: {
+		[key: string]: any
+	}
+}
+
+export type WebformComponentProps = {
 	element: WebformElement
 	error?: string
 }
@@ -61,7 +85,7 @@ export type WebformCustomComponentProps = {
 /**
  * Custom component for webform element
  */
-export type WebformCustomComponent = React.FC<WebformCustomComponentProps>
+export type WebformComponent = React.FC<WebformComponentProps>
 
 export type WebformValidateHandler = (event: FormEvent<HTMLFormElement>) => boolean
 export type WebformSubmitHandler = (
@@ -115,23 +139,23 @@ interface Props {
 	extraData?: object
 
 	/** Provide custom components that handle specific webform elements. */
-	customComponents: { [name: string]: WebformCustomComponent }
+	customComponents: { [name: string]: WebformComponent }
 }
 
 /**
  * Render single webform element.
  */
-export function renderWebformElement(element: WebformElement, error?: string, CustomComponent?: WebformCustomComponent) {
+export function renderWebformElement(element: WebformElement, error?: string, CustomComponent?: WebformComponent) {
 	const customComponentAPI = {
 		error
 	}
 
-	// Render using custom compoennt if provided:
+	// Render using custom component if provided:
 	if (CustomComponent) {
 		return <CustomComponent element={element} {...customComponentAPI} />
 	}
 
-	// Othervise select renderer based on element type:
+	// Otherwise select renderer based on element type:
 	switch (element.type) {
 		case 'textfield':
 			return <WebformInput element={{ ...element, type: 'text' }} {...customComponentAPI} />
@@ -156,14 +180,16 @@ export function renderWebformElement(element: WebformElement, error?: string, Cu
 			return <WebformText element={element} {...customComponentAPI} />
 		// Submit button
 		case 'webform_actions':
+			const el = deNormalizeElement(element)
+			const submitLabel = (el.additional_properties || {}).submit__label || DEFAULT_SUBMIT_LABEL
 			return (
 				<div className="form-group">
-					<button type="submit">{getAttributeValue('#submit__label', element) || DEFAULT_SUBMIT_LABEL}</button>
+					<button type="submit">{submitLabel}</button>
 				</div>
 			)
-		// Unknown element type -> render as json string
+		// Unknown element type -> render an empty string.
 		default:
-			return <WebformDebug element={element} error={error} />
+			return ''
 	}
 }
 
@@ -270,20 +296,3 @@ Webform.defaultProps = {
 }
 
 export default Webform
-
-/**
- * @deprecated I'm going to remove dependency to Gatsby in later versions.
- */
-export const query = graphql`
-	fragment SimpleWebform on webform__webform {
-		drupal_internal__id
-		elements {
-			name
-			type
-			attributes {
-				name
-				value
-			}
-		}
-	}
-`
