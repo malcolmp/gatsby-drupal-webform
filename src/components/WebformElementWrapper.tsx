@@ -63,11 +63,11 @@ const ElementWrapper: React.FC<Props> = ({ children, element, error, labelFor, l
 		return <></>
 	}
 
-	const label = (
+	const label = element.title ? (
 		<label style={getTileStyle(elementProperties)} className={labelClassNames} htmlFor={labelFor}>
 			{element.title}
 		</label>
-	)
+	) : '';
 
 	return (
 		<div {...props} className={wrapperClassNames}>

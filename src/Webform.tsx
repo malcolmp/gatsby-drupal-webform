@@ -77,13 +77,17 @@ export type DeNormalizedWebformElement = {
 	}
 }
 
+/**
+ * Webform component React props.
+ */
 export type WebformComponentProps = {
 	element: WebformElement
 	error?: string
+	[key: string]: any
 }
 
 /**
- * Custom component for webform element
+ * Webform React functional component for webform element.
  */
 export type WebformComponent = React.FC<WebformComponentProps>
 
@@ -139,45 +143,48 @@ interface Props {
 	extraData?: object
 
 	/** Provide custom components that handle specific webform elements. */
-	customComponents: { [name: string]: WebformComponent }
+	customComponents: { [name: string]: WebformComponent | WebformCustomComponentProps  }
 }
+
+type WebformCustomComponentProps = {
+	component: WebformComponent
+	props: Partial<WebformComponentProps>
+}
+
 
 /**
  * Render single webform element.
  */
-export function renderWebformElement(element: WebformElement, error?: string, CustomComponent?: WebformComponent) {
-	const customComponentAPI = {
-		error
-	}
+export function renderWebformElement(element: WebformElement, CustomComponent?: WebformComponent, componentProps?: Partial<WebformComponentProps>) {
 
 	// Render using custom component if provided:
 	if (CustomComponent) {
-		return <CustomComponent element={element} {...customComponentAPI} />
+		return <CustomComponent element={element} {...componentProps} />
 	}
 
 	// Otherwise select renderer based on element type:
 	switch (element.type) {
 		case 'textfield':
-			return <WebformInput element={{ ...element, type: 'text' }} {...customComponentAPI} />
+			return <WebformInput element={{ ...element, type: 'text' }} {...componentProps} />
 		case 'textarea':
-			return <WebformTextarea element={element} {...customComponentAPI} />
+			return <WebformTextarea element={element} {...componentProps} />
 		case 'tel':
 		case 'number':
 		case 'email':
 		case 'hidden':
-			return <WebformInput element={element} {...customComponentAPI} />
+			return <WebformInput element={element} {...componentProps} />
 		case 'checkbox':
 		case 'radio':
 			/** Render single checkbox or radio element. */
-			return <WebformCheckbox element={element} {...customComponentAPI} />
+			return <WebformCheckbox element={element} {...componentProps} />
 		case 'checkboxes':
-			return <WebformCheckboxGroup element={{ ...element, type: 'checkbox' }} {...customComponentAPI} />
+			return <WebformCheckboxGroup element={{ ...element, type: 'checkbox' }} {...componentProps} />
 		case 'radios':
-			return <WebformCheckboxGroup element={{ ...element, type: 'radio' }} {...customComponentAPI} />
+			return <WebformCheckboxGroup element={{ ...element, type: 'radio' }} {...componentProps} />
 		case 'select':
-			return <WebformSelect element={element} {...customComponentAPI} />
+			return <WebformSelect element={element} {...componentProps} />
 		case 'processed_text':
-			return <WebformText element={element} {...customComponentAPI} />
+			return <WebformText element={element} {...componentProps} />
 		// Submit button
 		case 'webform_actions':
 			const el = deNormalizeElement(element)
@@ -267,6 +274,23 @@ const Webform = ({ webform, customComponents, ...props }: Props) => {
 		}
 	}
 
+	// Prepare the components and their props.
+	let components: { [key:string]: WebformComponent} = {};
+	let componentProps: { [key:string]: Partial<WebformComponentProps> } = {};
+	webform.elements.forEach((element) => {
+		let error:string = errors[element.name];
+		componentProps[element.name] = {
+			error
+		};
+		if (typeof customComponents[element.type] === 'object' ) {
+			let {component, props} = customComponents[element.type] as WebformCustomComponentProps;
+			components[element.name] = component;
+			Object.assign(componentProps[element.name], props);
+		} else {
+			components[element.name] = customComponents[element.type] as WebformComponent;
+		}
+	});
+
 	return (
 		<form
 			onSubmit={submitHandler}
@@ -279,7 +303,7 @@ const Webform = ({ webform, customComponents, ...props }: Props) => {
 			{/* Render webform elements */}
 			{webform.elements.map(element => (
 				<React.Fragment key={element.name}>
-					{renderWebformElement(element, errors[element.name], customComponents![element.type])}
+					{renderWebformElement(element, components[element.name], componentProps[element.name])}
 				</React.Fragment>
 			))}
 

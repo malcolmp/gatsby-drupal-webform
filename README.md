@@ -24,7 +24,7 @@ properties from normalized objects of the format `{ key: String, value: String }
 * If your frontend is hosted on a different domain make sure browser has cross origin access to the Webform Submit REST resource using the [CORS module](https://www.drupal.org/project/cors).
 
 ```
-npm install --save @malcolmp/gatsby-drupal-webform
+npm install --save @umg/gatsby-drupal-webform
 ```
 
 ### Examples

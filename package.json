@@ -1,5 +1,5 @@
 {
-  "name": "@malcolmp/gatsby-drupal-webform",
+  "name": "@umg/gatsby-drupal-webform",
   "version": "3.0.0-dev",
   "description": "React component for Drupal webforms",
   "author": "Malcolm Poindexter <malcolm.poindexter@umusic.com>",
@@ -33,7 +33,6 @@
     "type": "git",
     "url": "git+https://github.com/malcolmp/gatsby-drupal-webform.git"
   },
-  "private": true,
   "bugs": {
     "url": "https://github.com/malcolmp/gatsby-drupal-webform/issues"
   },

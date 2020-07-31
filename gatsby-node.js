@@ -1,7 +1,7 @@
 
-exports.createSchemaCustomization = ({ actions, schema }) =>
+exports.createSchemaCustomization = ({ actions }) =>
 {
-	const {createTypes} = actions
+	const {createTypes} = actions;
 
 	createTypes(`
 		type webform__webform implements Node {
@@ -13,7 +13,19 @@ exports.createSchemaCustomization = ({ actions, schema }) =>
 	    elements: [WebformElement]
 	  }
 	  
-	  type WebformElement {  
+	  interface WebformElementInterface {  
+	    name: String
+	    title: String
+	    type: String
+	    options: [WebformOption]
+	    states: [WebformState]
+	    attributes: [WebformAttribute]
+	    label_attributes: [WebformAttribute]
+	    wrapper_attributes: [WebformAttribute]
+	    additional_properties: [WebformAttribute]
+	  }
+	  
+	  type WebformElement implements WebformElementInterface { 
 	    name: String
 	    title: String
 	    type: String
